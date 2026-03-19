@@ -331,6 +331,7 @@ EfgDisplay::EfgDisplay(wxWindow *p_parent, GameDocument *p_doc)
   Connect(m_payoffEditor->GetId(), wxEVT_COMMAND_TEXT_ENTER,
           wxCommandEventHandler(EfgDisplay::OnAcceptPayoffEdit));
   OnUpdate();
+  CallAfter(&EfgDisplay::SetInitialZoom);
 }
 
 void EfgDisplay::MakeMenus()
@@ -606,6 +607,31 @@ void EfgDisplay::AdjustScrollbarSteps()
 
   SetScrollbars(50, 50, static_cast<int>(m_layout.MaxX() * (.01 * m_zoom) / 50 + 1),
                 static_cast<int>(m_layout.MaxY() * (.01 * m_zoom) / 50 + 1), scrollX, scrollY);
+}
+
+void EfgDisplay::SetInitialZoom()
+{
+  int clientW, clientH;
+  GetClientSize(&clientW, &clientH);
+  if (clientW == 0 || clientH == 0) return;
+
+  const int treeW = m_layout.MaxX();
+  const int treeH = m_layout.MaxY();
+  if (treeW == 0 || treeH == 0) return;
+
+  int zoom = 100;
+
+  double zoomByWidth = static_cast<double>(clientW)
+                     / static_cast<double>(treeW) * 100.0;
+
+  if (zoomByWidth < 100.0) {
+    zoom = static_cast<int>(std::max(zoomByWidth, 85.0));
+  }
+
+  m_zoom = zoom;
+  AdjustScrollbarSteps();
+  EnsureNodeVisible(m_doc->GetGame()->GetRoot());
+  Refresh();
 }
 
 void EfgDisplay::FitZoom()

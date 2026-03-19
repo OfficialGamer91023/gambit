@@ -90,6 +90,7 @@ public:
   int GetZoom() const { return m_zoom; }
   void SetZoom(int p_zoom);
   void FitZoom();
+  void SetInitialZoom();
 
   const TreeLayout &GetLayout() const { return m_layout; }
 
